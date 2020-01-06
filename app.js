@@ -1,6 +1,7 @@
 const telegram = require('telegram-bot-api')
 const config = require('./config')
 const queue = require('./queue')
+const {Logging} = require('@google-cloud/logging')
 
 const api = new telegram({
     token: config.token,
@@ -8,6 +9,9 @@ const api = new telegram({
         enabled: true
     }
 })
+
+const logClient = new Logging('leafy-mountain-259708');
+const log = logClient.log('ochered_bot.log');
 
 const nodesIndex = {}
 
@@ -19,6 +23,11 @@ api.on('message', (message) => {
     const chat_id = message.chat.id
 
     const text = message.text
+
+    log.write(log.entry({
+        resource: {type: 'global'}
+    }, message)).catch(console.error);
+
     const words = text.split(' ')
 
     words.forEach(element => {
@@ -57,6 +66,23 @@ api.on('message', (message) => {
                 })
             }
 
+        } else if (element == '/info' || element == '/start'){
+            var replyText = 'Информация об очередях на границе Республики Беларусь с сайта Государственного пограничного комитета Республики Беларусь https://gpk.gov.by\n\n'
+            
+            replyText += 'Для получения информации отправьте боту сообщение в виде "Пункт1 Пункт2 Пункт3", например:\nБрузги Берестовица Привалка\n\n'
+
+            replyText += 'Список пунктов пропуска:\n'
+
+            config.nodes.forEach(node => {
+                replyText += node.name + ' (' + node.country + '), варианты [ '
+                node.alias.forEach(alias => replyText += alias + ' ')
+                replyText += ']' + '\n'
+            })
+
+            api.sendMessage({
+                chat_id: chat_id, 
+                text: replyText
+            })
         }
     })
 })
