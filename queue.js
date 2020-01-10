@@ -3,7 +3,7 @@ const cherio = require('cheerio')
 const config = require('./config')
 
 const queue = (node, callback) => {
-    const url = config.url + node
+    const url = config.url + node + '/'
 
     request({url: url}, (error, response, body) => {
         if(error) {

@@ -49,10 +49,26 @@ api.on('message', (message) => {
                         replyText +=  node.name + ' (' + node.country + '): ' + error
                     }
 
-                    api.sendMessage({
-                        chat_id: chat_id, 
-                        text: replyText
-                    })
+                    if(node.camera) {
+                        try {
+                            api.sendPhoto({
+                                chat_id: chat_id,
+                                caption: replyText,
+                                
+                                photo: node.camera + '?rnd=' + Math.random()
+                            })
+                        } catch (error) {
+                            api.sendMessage({
+                                chat_id: chat_id, 
+                                text: replyText
+                            })
+                        }
+                    } else {
+                        api.sendMessage({
+                            chat_id: chat_id, 
+                            text: replyText
+                        })
+                    }
 
                 })
             } else {
